@@ -92,6 +92,7 @@ toPrintCS = function(cs) {
 
 cryptoSystem = calculateKeys()
 toPrintCS(cryptoSystem)
+console.log("ed mod n = ", cryptoSystem.e.multipliedBy(cryptoSystem.d).mod(cryptoSystem.n).toFixed())
 
 missatge = aleatorEnter(MAX_RND)
 console.log("missatge =",missatge.toFixed())
