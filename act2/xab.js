@@ -27,10 +27,10 @@ Dsk(c) = c*d mod n
 */
 const BigNumber = require('bignumber.js');
 
-const MAX_DEC = 50
+const MAX_DEC = 2
 
 BigNumber.set({ DECIMAL_PLACES: MAX_DEC })
-const MAX_RND = BigNumber(10).pow(MAX_DEC)
+const MAX_RND = BigNumber(10).pow(MAX_DEC) // Max random 10 ^ MAX_DEC
 const ℕ = true
 
 
@@ -55,12 +55,7 @@ calculateKeys = function () {
     cs.b =  aleatorEnter(MAX_RND)
     cs.a2 = aleatorEnter(MAX_RND)
     cs.b2 = aleatorEnter(MAX_RND)
-/*
-    cs.a = BigNumber(16)
-    cs.b = BigNumber(20)
-    cs.a2 = BigNumber(18)
-    cs.b2 = BigNumber(14).times(-1)
-*/
+
     cs.M = cs.a.multipliedBy(cs.b).minus(1)
     cs.e = cs.a2.multipliedBy(cs.M).plus(cs.a)
     cs.d = cs.b2.multipliedBy(cs.M).plus(cs.b)
@@ -99,14 +94,25 @@ cryptoSystem = calculateKeys()
 toPrintCS(cryptoSystem)
 
 missatge = aleatorEnter(MAX_RND)
-//missatge = BigNumber(15)
 console.log("missatge =",missatge.toFixed())
 
 mencrypt = enc(cryptoSystem.pk, missatge)
 console.log("encriptat =",mencrypt.toFixed())
 
+// És el màxim fake que pots fer n-1 / missatge,
+// Donat que si missatge > n la formula de desencriptar e
+let maxfake = cryptoSystem.n.minus(1).idiv(missatge)
+console.log("n/m =",maxfake.toFixed())
+
+fakeme = mencrypt.multipliedBy(maxfake)
+fakeme = aleatorEnter(MAX_RND)
+console.log("fakeme =",fakeme.toFixed())
+
 mdecrypt = dec(cryptoSystem.sk, mencrypt)
 console.log("desencriptat =",mdecrypt.toFixed())
+
+console.log("decript fake(",maxfake.toFixed(),") =",dec(cryptoSystem.sk, fakeme).toFixed())
+console.log("max_fake = ", dec(cryptoSystem.sk, fakeme).div(maxfake).toFixed())
 
 if (missatge.eq(mdecrypt)) {
     console.log("Correcte!")
