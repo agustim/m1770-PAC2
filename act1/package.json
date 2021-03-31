@@ -1,0 +1,13 @@
+{
+  "name": "act1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.1",
+    "bitwise": "^2.1.0"
+  }
+}
