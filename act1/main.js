@@ -1,7 +1,7 @@
 const bitwise = require('bitwise')
 const BigNumber = require('bignumber.js');
 
-const MAX_DEC = 8
+const MAX_DEC = 128
 
 let Ys = []
 let Yxs = []
@@ -82,11 +82,11 @@ let c = crypt(x)
 // Mostrem les variables x
 pconsole("key =",key)
 pconsole("x =",x)
-pconsole("c =",c)
+pconsole("c = E(x) =",c)
 
 // Test 
 let tittle_test
-title_test = "crypt(crypt(x))=x"
+title_test = "Protocol simètric => crypt(crypt(x))=x"
 let t1_x1 = generateRandomBitwise()
 let t1_EEx1 = crypt(crypt(t1_x1))
 if (bwb.reduceOr(bwb.xor(t1_x1,t1_EEx1)) != 0) {
@@ -96,7 +96,7 @@ if (bwb.reduceOr(bwb.xor(t1_x1,t1_EEx1)) != 0) {
 } else {
     console.log(title_test,"ok")
 }
-title_test = "Test Ek(x1 xor x2) = Ek(x1) xor Ek(x2)"
+title_test = "Propietat Distributiva de Ek i xor => Ek(x1 xor x2) = Ek(x1) xor Ek(x2)"
 let t2_x1 = generateRandomBitwise()
 let t2_x2 = generateRandomBitwise()
 let t2_Ex1 = crypt(t2_x1)
@@ -124,12 +124,12 @@ Yxs = calculaYxs(Ys)
 
 let myX1 = []
 for (let i=0; i < MAX_DEC; i++) {
-    let cXORYs = bwf.xor(c,Ys[i])
-    console.log("Ys[",i,"] =",bwb.toString(Ys[i]),"Yxs[",i,"] =",bwb.toString(Yxs[i]), "XOR =",bwb.toString(cXORYs))
-    myX1.push(bwb.toString(cXORYs).substr(i,1))
+    let cXORYxs = bwf.xor(c,Yxs[i])
+    console.log("Ys[",i,"] =",bwb.toString(Ys[i]),"Yxs[",i,"] =",bwb.toString(Yxs[i]), "XOR",bwb.toString(c),"=",bwb.toString(cXORYxs))
+    myX1.push(bwb.toString(cXORYxs).substr(i,1))
 }
 pconsole("myX =",myX1)
-/*
+
 // Validem que X i myX1 son iguals.
 // bwb.reduceOr(bwb.xor(x,myX1)) -> 0 si x = myX1, 1 si x <> myX1
 if (bwb.reduceOr(bwb.xor(x,myX1)) == 0) {
@@ -137,14 +137,14 @@ if (bwb.reduceOr(bwb.xor(x,myX1)) == 0) {
 } else {
     console.log("incorrecte.")
 }
-*/
+
 // En realitat pot existir un element neutre que seria un x tal que E(x) = 0 
 let neutre = generaNeutre()
 pconsole("neutre =",neutre)
 let Eneutre =crypt( neutre)
 pconsole("Eneutre =",Eneutre)
 let XNeutre = bwf.xor(c,Eneutre)
-pconsole("c XOR neture=",XNeutre)
+pconsole("c XOR Eneture=",XNeutre)
 
 if (bwb.reduceOr(bwb.xor(x,XNeutre)) == 0) {
     console.log("correcte!")
