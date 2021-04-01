@@ -1,7 +1,7 @@
 const bitwise = require('bitwise')
 const BigNumber = require('bignumber.js');
 
-const MAX_DEC = 128
+const MAX_DEC = 8
 
 let Ys = []
 let Yxs = []
@@ -57,9 +57,14 @@ generaNeutre = function() {
 
 crypt = function(bw){
     // Aquesta funció NO és conneguda, però hem de tenir un sistema d'encriptació tal que
-    // E(x XOR y) = E(x) XOR E(y)
+    // E(x XOR y) = E(x) XOR E(y) i 
+    // Com que és una funció simetrica 
+    // crypt(crypt(x)) = x
     // Faig servir un NOT XOR d'una clau aleatoria.
-    return bitwise.bits.xnor(bw,key)
+    //return bitwise.bits.xnor(bw,key)
+    const halfsize = MAX_DEC /2
+    b = bitwise.bits
+    return b.xnor(bw,key)
 }
 
 pconsole = function(strPre, bw) {
@@ -67,6 +72,8 @@ pconsole = function(strPre, bw) {
 }
 
 
+bwb = bitwise.bits
+bwf = bitwise.buffer
 // Comença el programa
 // Definim variables "ocultes"
 const key = generateRandomBitwise()
@@ -77,6 +84,36 @@ pconsole("key =",key)
 pconsole("x =",x)
 pconsole("c =",c)
 
+// Test 
+let tittle_test
+title_test = "crypt(crypt(x))=x"
+let t1_x1 = generateRandomBitwise()
+let t1_EEx1 = crypt(crypt(t1_x1))
+if (bwb.reduceOr(bwb.xor(t1_x1,t1_EEx1)) != 0) {
+    console.log("Error on",title_test,"(debug):")
+    pconsole("x1=",t1_x1)
+    pconsole("crypt(crypt(x1))=",t1_EEx1)
+} else {
+    console.log(title_test,"ok")
+}
+title_test = "Test Ek(x1 xor x2) = Ek(x1) xor Ek(x2)"
+let t2_x1 = generateRandomBitwise()
+let t2_x2 = generateRandomBitwise()
+let t2_Ex1 = crypt(t2_x1)
+let t2_Ex2 = crypt(t2_x2)
+let t2_Ex1xorEx2 = bwf.xor(t2_Ex1,t2_Ex2)
+let t2_Ex1xorx2 = crypt(bwf.xor(t2_x1,t2_x2))
+if (bwb.reduceOr(bwb.xor(t2_Ex1xorEx2,t2_Ex1xorx2)) == 0) {
+    console.log("Error on",title_test,"(debug):")
+    pconsole("x1 =",t2_x1)
+    pconsole("x2 =",t2_x2)
+    pconsole("Ex1 =",t2_Ex1)
+    pconsole("Ex2 =",t2_Ex2)
+    pconsole("Ex1xorEx2 =",t2_Ex1xorEx2)
+    pconsole("Ex1xorx2 =",t2_Ex1xorx2)
+} else {
+    console.log(title_test,"ok")
+}
 // Generem Ys tal que cada bit tingui un 0 i la resta 1.
 Ys = generarYs()
 // Calculem el seus textos encriptats.
@@ -84,30 +121,32 @@ Yxs = calculaYxs(Ys)
 
 // A partir d'aquí només podem fer servir c,Ys,Yxs i la funció xor
 
-bw = bitwise.bits
 
 let myX1 = []
 for (let i=0; i < MAX_DEC; i++) {
-    let cXORYxs = bitwise.buffer.xor(c,Yxs[i])
-//    console.log("Ys[",i,"] =",bw.toString(Ys[i]),"Yxs[",i,"] =",bw.toString(Yxs[i]), "XOR =",bw.toString(cXORYxs))
-    myX1.push(bw.toString(cXORYxs).substr(i,1))
+    let cXORYs = bwf.xor(c,Ys[i])
+    console.log("Ys[",i,"] =",bwb.toString(Ys[i]),"Yxs[",i,"] =",bwb.toString(Yxs[i]), "XOR =",bwb.toString(cXORYs))
+    myX1.push(bwb.toString(cXORYs).substr(i,1))
 }
 pconsole("myX =",myX1)
-
+/*
 // Validem que X i myX1 son iguals.
-// bitwise.bits.reduceOr(bitwise.bits.xor(x,myX1)) -> 0 si x = myX1, 1 si x <> myX1
-if (bitwise.bits.reduceOr(bitwise.bits.xor(x,myX1)) == 0) {
+// bwb.reduceOr(bwb.xor(x,myX1)) -> 0 si x = myX1, 1 si x <> myX1
+if (bwb.reduceOr(bwb.xor(x,myX1)) == 0) {
     console.log("correcte!")
 } else {
     console.log("incorrecte.")
 }
-
+*/
 // En realitat pot existir un element neutre que seria un x tal que E(x) = 0 
-let neutre = crypt(generaNeutre())
-let XNeutre = bitwise.buffer.xor(c,neutre)
+let neutre = generaNeutre()
+pconsole("neutre =",neutre)
+let Eneutre =crypt( neutre)
+pconsole("Eneutre =",Eneutre)
+let XNeutre = bwf.xor(c,Eneutre)
 pconsole("c XOR neture=",XNeutre)
 
-if (bitwise.bits.reduceOr(bitwise.bits.xor(x,XNeutre)) == 0) {
+if (bwb.reduceOr(bwb.xor(x,XNeutre)) == 0) {
     console.log("correcte!")
 } else {
     console.log("incorrecte.")
